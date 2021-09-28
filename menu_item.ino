@@ -20,6 +20,29 @@ void menu_0()
          beeping(1); 
          oled.setContrast(yark_dipsl); 
    }
+
+   if (enc.isHolded()) 
+    {
+     // enc.counter = 0;      // изменение счётчика
+     // oled.clear(); Сделать включение противотуманок
+      if (PTF == 1 & menu==0) //Если на 0 меню, то можно управлять ПТФ, в других меню нельзя 
+      {
+         PTF=0;
+         oled.clear(0,0,128, 15); 
+         beeping(1);
+         
+      } else if (menu==0)
+      {
+          PTF=1;
+          displayName("ПТФ");//Отображаем желтую полоску сверху(что бы информировать что включены ПТФ) 
+          
+          beeping(2); 
+      }
+       
+      Serial.println(PTF);
+      
+      EEPROM.update(ADR_PTF, PTF);
+     }
  
   
 }
@@ -54,6 +77,13 @@ void menu_1()
         Serial.print("yarkost"); 
        Serial.println(svet_yarkost);
    }
+
+   if (enc.isHolded()) 
+    {
+      beeping(15);
+      EEPROM.update(ADR_SVET, svet_yarkost);
+      
+    }
    
 }
 
@@ -76,6 +106,12 @@ void menu_2()
       oled.rect(0,0,128, 15); 
       beeping(2); 
    }
+   
+   if (enc.isHolded()) 
+    {
+      beeping(15);
+      EEPROM.update(ADR_POMPA, nasos_power);
+    }
 }
 
 void menu_3()
@@ -95,6 +131,14 @@ void menu_3()
       beeping(2); 
       displayName("АВТО");
    }
+
+   if (enc.isHolded()) 
+    {
+      beeping(15);
+      EEPROM.update(ADR_AUTO, auto_svet);
+    }
+
+   
 }
 
 void menu_4()
@@ -123,6 +167,12 @@ void menu_4()
       oled.print(auto_svetn_on); 
     
    }
+
+    if (enc.isHolded()) 
+    {
+      beeping(15);
+      EEPROM.update(ADR_DAT_SVET, auto_svetn_on);
+    }
   
 
 }

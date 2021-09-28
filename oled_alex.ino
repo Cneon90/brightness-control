@@ -1,9 +1,20 @@
 // дефайн перед подключением либы - использовать microWire (лёгкая либа для I2C)
 //#define USE_MICRO_WIRE
 //Отключаем дисплей oled.setPower(false);
+#include <EEPROM.h>
 #include <GyverOLED.h>
 #include "menu_icon.h"
 #include <EncButton.h>
+
+/*EEPROM Адреса хранения */ 
+  #define ADR_POMPA 100 //адрес значение включена помпа или выключена
+  #define ADR_SVET 102 //адрес значение яркоти света
+  #define ADR_AUTO 104 //Адрес хранения знечения статуса включения автоматического управления освещением
+  #define ADR_DAT_SVET 105 //Датчик света 
+  
+  #define ADR_PTF 107
+/*EEPROM*/
+
 
 #define OUT_MENU 5000
 #define UPDATE_TEMP 1000
@@ -28,9 +39,21 @@ uint32_t myTimer4;//Таймер3 При включении помпы отоб�
 int svet_yarkost=0;
 int yark_dipsl=255;
 
+
+
 GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
 EncButton<EB_TICK, 2, 3, 7> enc;  // энкодер с кнопкой <A, B, KEY>
 
+void loader_eeprom()
+{
+    PTF = EEPROM.read(ADR_PTF); 
+    nasos_power =EEPROM.read(ADR_POMPA);
+    auto_svet =EEPROM.read(ADR_AUTO) ;
+    auto_svetn_on = EEPROM.read(ADR_DAT_SVET) ;
+    svet_yarkost = EEPROM.read(ADR_SVET);
+    //Serial.println(
+    enc.counter = svet_yarkost;      // изменение счётчика
+}
 
 void setup() {
   /*init pin*/
@@ -54,15 +77,16 @@ void setup() {
  /*OLED*/
 
  /*encoder*/
-   enc.counter = 0;      // изменение счётчика
+  
  /*encoder*/
- 
+ loader_eeprom();
      
 
 }
 
 
 void loop() {
+  Serial.println(analogRead(A1));
   enc.tick();
   out_menu_0();//Проверка(если нет действий выход на 0 меню)
   
@@ -80,26 +104,7 @@ void loop() {
       myTimer2 = millis();//Сброс таймера (действие) 
   }
 
-  if (enc.isHolded()) 
-    {
-     // enc.counter = 0;      // изменение счётчика
-     // oled.clear(); Сделать включение противотуманок
-      if (PTF == 1 & menu==0) //Если на 0 меню, то можно управлять ПТФ, в других меню нельзя 
-      {
-         PTF=0;
-         oled.clear(0,0,128, 15); 
-         beeping(1);
-         
-      } else if (menu==0)
-      {
-          PTF=1;
-          displayName("ПТФ");//Отображаем желтую полоску сверху(что бы информировать что включены ПТФ) 
-          
-          beeping(2); 
-      }
-       
-      Serial.println(PTF);
-     }
+  
 
    select_menu();
    car_pompa();
